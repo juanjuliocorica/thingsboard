@@ -343,11 +343,11 @@
         "any-relation": "cualquiera"
     },
     "asset": {
-        "asset": "Activo",
-        "assets": "Activos",
-        "management": "Gestión de Activos",
-        "view-assets": "Ver Activos",
-        "add": "Añadir Activo",
+        "asset": "Unidad energética",
+        "assets": "Unidades Energéticas",
+        "management": "Gestión de UE",
+        "view-assets": "Ver UE",
+        "add": "Añadir UE",
         "assign-to-customer": "Asignar a cliente",
         "assign-asset-to-customer": "Asignar Activo(s) A Cliente",
         "assign-asset-to-customer-text": "Selecciona los activos a asignar al cliente",
