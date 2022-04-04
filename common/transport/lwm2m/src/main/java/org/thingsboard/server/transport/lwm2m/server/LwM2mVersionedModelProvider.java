@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2021 The Thingsboard Authors
+ * Copyright © 2016-2022 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,9 @@ public class LwM2mVersionedModelProvider implements LwM2mModelProvider {
             this.registration = registration;
             this.tenantId = lwM2mClientContext.getClientByEndpoint(registration.getEndpoint()).getTenantId();
             this.modelsLock = new ReentrantLock();
-            models.computeIfAbsent(tenantId, t -> new ConcurrentHashMap<>());
+            if (tenantId != null) {
+                models.computeIfAbsent(tenantId, t -> new ConcurrentHashMap<>());
+            }
         }
 
         @Override
@@ -95,7 +97,7 @@ public class LwM2mVersionedModelProvider implements LwM2mModelProvider {
                 if (objectModel != null)
                     return objectModel.resources.get(resourceId);
                 else
-                    log.trace("TbResources (Object model) with id [{}/0/{}] not found on the server", objectId, resourceId);
+                    log.trace("Tenant hasn't such the TbResources: Object model with id [{}/0/{}].", objectId, resourceId);
                 return null;
             } catch (Exception e) {
                 log.error("", e);
@@ -127,15 +129,18 @@ public class LwM2mVersionedModelProvider implements LwM2mModelProvider {
 
         private ObjectModel getObjectModelDynamic(Integer objectId, String version) {
             String key = getKeyIdVer(objectId, version);
-            ObjectModel objectModel = models.get(tenantId).get(key);
-
-            if (objectModel == null) {
+            ObjectModel objectModel = tenantId != null ? models.get(tenantId).get(key) : null;
+            if (tenantId != null && objectModel == null) {
                 modelsLock.lock();
                 try {
                     objectModel = models.get(tenantId).get(key);
                     if (objectModel == null) {
                         objectModel = getObjectModel(key);
+                    }
+                    if (objectModel != null) {
                         models.get(tenantId).put(key, objectModel);
+                    } else {
+                        log.error("Tenant hasn't such the resource: Object model with id [{}] version [{}].", objectId, version);
                     }
                 } finally {
                     modelsLock.unlock();
